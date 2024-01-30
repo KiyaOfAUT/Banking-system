@@ -7,6 +7,7 @@ import os
 import random
 from datetime import datetime
 
+
 def clear_screen():
     os.system('cls' if os.name == 'nt' else 'clear')
 
@@ -105,7 +106,7 @@ def create_account(cellphone_num, amount):
         session.add(new_account)
         session.commit()
         clear_screen()
-        print(f"Account created successfully for user {cellphone_num}. Card number: {card_number}")
+        print(f"Account created successfully.\n Card number: {card_number} \n shaba number: {shaba_num}")
 
     except Exception as e:
         session.rollback()
@@ -165,76 +166,101 @@ def card_num(num):
 
 
 def card_to_card(sender, receiver, amount):
-    account = session.query(Account).filter_by(Card_num=sender).first()
-    rcv = session.query(Account).filter_by(Card_num=receiver).first()
-    if not rcv:
-        clear_screen()
-        print(f"wrong receiver!\nno account with number {receiver} found!")
-        return -1
-    if amount <= account.amount:
-        if account.card_to_card + amount < transaction_type[0]:
-            new_transaction = Transaction(sender=sender, receiver=receiver, type=0, time=datetime.now(), amount=amount)
-            session.add(new_transaction)
-            session.commit()
+    try:
+        account = session.query(Account).filter_by(Card_num=sender).first()
+        rcv = session.query(Account).filter_by(Card_num=receiver).first()
+        if not rcv:
             clear_screen()
-            print(f"successfully transferred! \n your transaction id : {new_transaction.transaction_id}")
+            print(f"wrong receiver!\nno account with number {receiver} found!")
+            return 0
+        if amount <= account.amount:
+            if account.card_to_card + amount < transaction_type[0]:
+                new_transaction = Transaction(sender=sender, receiver=receiver, type=0, time=datetime.now(), amount=amount)
+                session.add(new_transaction)
+                session.commit()
+                transactionid = new_transaction.transaction_id
+                clear_screen()
+                print(f"successfully transferred! \n your transaction id : {transactionid}")
+            else:
+                session.rollback()
+                clear_screen()
+                print('requested amount exceeds daily limit!!')
+                return 0
         else:
             session.rollback()
             clear_screen()
-            print('requested amount exceeds daily limit!!')
+            print('not enough money in your account!!')
             return 0
-    else:
+    except Exception as e:
         session.rollback()
         clear_screen()
-        print('not enough money in your account!!')
+        print(f"Sign-up failed. An unexpected error occurred: {e}")
         return 0
 
 
 def paya(sender, receiver, amount):
-    account = session.query(Account).filter_by(Card_num=sender).first()
-    if amount <= account.amount:
-        if account.PAYA + amount < transaction_type[1]:
-            new_transaction = Transaction(sender=sender, receiver=receiver, type=1, time=datetime.now(), amount=amount)
-            session.add(new_transaction)
-            session.commit()
-            clear_screen()
-            print(f"successfully transferred! \n your transaction id : {new_transaction.transaction_id}")
+    try:
+        account = session.query(Account).filter_by(Card_num=sender).first()
+        if amount <= account.amount:
+            if account.PAYA + amount < transaction_type[1]:
+                new_transaction = Transaction(sender=sender, receiver=receiver, type=1, time=datetime.now(), amount=amount)
+                session.add(new_transaction)
+                session.commit()
+                transactionid = new_transaction.transaction_id
+                clear_screen()
+                print(f"successfully transferred! \n your transaction id : {transactionid}")
+            else:
+                session.rollback()
+                clear_screen()
+                print('requested amount exceeds daily limit!!')
+                return 0
         else:
             session.rollback()
             clear_screen()
-            print('requested amount exceeds daily limit!!')
+            print('not enough money in your account!!')
             return 0
-    else:
+    except Exception as e:
         session.rollback()
         clear_screen()
-        print('not enough money in your account!!')
+        print(f"Sign-up failed. An unexpected error occurred: {e}")
         return 0
 
 
 def satna(sender, receiver, amount):
-    account = session.query(Account).filter_by(Card_num=sender).first()
-    if amount <= account.amount:
-        if account.SATNA + amount < transaction_type[2]:
-            new_transaction = Transaction(sender=sender, receiver=receiver, type=2, time=datetime.now(), amount=amount)
-            session.add(new_transaction)
-            session.commit()
-            clear_screen()
-            print(f"successfully transferred! \n your transaction id : {new_transaction.transaction_id}")
+    try:
+        account = session.query(Account).filter_by(Card_num=sender).first()
+        if amount <= account.amount:
+            if account.SATNA + amount < transaction_type[2]:
+                new_transaction = Transaction(sender=sender, receiver=receiver, type=2, time=datetime.now(), amount=amount)
+                session.add(new_transaction)
+                session.commit()
+                transactionid = new_transaction.transaction_id
+                clear_screen()
+                print(f"successfully transferred! \n your transaction id : {transactionid}")
+            else:
+                session.rollback()
+                clear_screen()
+                print('requested amount exceeds daily limit!!')
+                return 0
         else:
             session.rollback()
             clear_screen()
-            print('requested amount exceeds daily limit!!')
+            print('not enough money in your account!!')
             return 0
-    else:
+    except Exception as e:
         session.rollback()
         clear_screen()
-        print('not enough money in your account!!')
+        print(f"Sign-up failed. An unexpected error occurred: {e}")
         return 0
 
 
 def transfer(sender, receiver, amount, type_):
     sender = card_num(sender)
     receiver = card_num(receiver)
+    if type_ < 0 or type_ > 2 or amount < 0 or not sender or not receiver:
+        clear_screen()
+        print("wrong input!")
+        return 0
     if type_ == 0:
         return card_to_card(sender, receiver, amount)
     elif type_ == 1:
@@ -254,7 +280,7 @@ def transaction_validation(transactionid, cell_num):
                 return 1
     clear_screen()
     print("no transaction was found!")
-    return -1
+    return 0
 
 
 def last_n(card_num_, n):
