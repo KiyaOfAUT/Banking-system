@@ -12,7 +12,7 @@ def clear_screen():
     os.system('cls' if os.name == 'nt' else 'clear')
 
 
-engine = create_engine('mysql://root:*xV75pc92hI2@localhost/Bank', echo=True)
+engine = create_engine('mysql://root:*******@localhost/Bank', echo=True)
 
 Session = sessionmaker(bind=engine)
 session = Session()
